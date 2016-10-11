@@ -254,13 +254,52 @@ void read_json(FILE *json) {
                         }
                         objects[counter].sphere.radius = temp;
                     }
+                    else if (strcmp(key, "radial-a0") == 0) {
+                        double rad_a = next_number(json);
+                        if (rad_a < 0) { // TODO: find out if this should be <=
+                            fprintf(stderr, "Error: read_json: radial-a0 must be positive: %d\n", line);
+                            exit(1);
+                        }
+                        objects[counter].light.rad_att0 = rad_a;
+                    }
+                    else if (strcmp(key, "radial-a1") == 0) {
+                        double rad_a = next_number(json);
+                        if (rad_a < 0) { // TODO: find out if this should be <=
+                            fprintf(stderr, "Error: read_json: radial-a1 must be positive: %d\n", line);
+                            exit(1);
+                        }
+                        objects[counter].light.rad_att1 = rad_a;
+                    }
+                    else if (strcmp(key, "radial-a2") == 0) {
+                        double rad_a = next_number(json);
+                        if (rad_a < 0) { // TODO: find out if this should be <=
+                            fprintf(stderr, "Error: read_json: radial-a2 must be positive: %d\n", line);
+                            exit(1);
+                        }
+                        objects[counter].light.rad_att2 = rad_a;
+                    }
+                    else if (strcmp(key, "angular-a0") == 0) {
+                        double ang_a = next_number(json);
+                        if (ang_a < 0) { // TODO: find out if this should be <=
+                            fprintf(stderr, "Error: read_json: angular-a0 must be positive: %d\n", line);
+                            exit(1);
+                        }
+                        objects[counter].light.ang_att0 = ang_a;
+                    }
+                    else if (strcmp(key, "color") == 0) {
+                        if (obj_type != LIGHT) {
+                            fprintf(stderr, "Error: Just plain 'color' vector can only be applied to a light object\n");
+                            exit(1);
+                        }
+                        objects[counter].light.color = next_rgb_color(json);
+                    }
                     else if (strcmp(key, "specular_color") == 0) {
                         if (obj_type == SPHERE)
                             objects[counter].sphere.spec_color = next_rgb_color(json);
                         else if (obj_type == PLANE)
                             objects[counter].plane.spec_color = next_rgb_color(json);
                         else {
-                            fprintf(stderr, "Error: read_json: Color vector can't be applied here: %d\n", line);
+                            fprintf(stderr, "Error: read_json: speculaor_color vector can't be applied here: %d\n", line);
                             exit(1);
                         }
                     }
@@ -270,7 +309,7 @@ void read_json(FILE *json) {
                         else if (obj_type == PLANE)
                             objects[counter].plane.diff_color = next_rgb_color(json);
                         else {
-                            fprintf(stderr, "Error: read_json: Color vector can't be applied here: %d\n", line);
+                            fprintf(stderr, "Error: read_json: diffuse_color vector can't be applied here: %d\n", line);
                             exit(1);
                         }
                     }
