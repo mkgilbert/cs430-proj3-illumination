@@ -11,7 +11,7 @@
 #include "../include/vector_math.h"
 #include "../include/raycaster.h"
 #include "../include/ppmrw.h"
-
+#include "../include/base.h"
 
 /* example usage: raycast width height input.json out.ppm */
 int main(int argc, char *argv[]) {
@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
     }
 
     /* fill the img->pixmap with colors by raycasting the objects */
-    raycast_scene(&img, objects[pos].cam.width, objects[pos].cam.height, objects);
+    raycast_scene(&img, objects[pos].camera.width, objects[pos].camera.height, objects);
 
     /* create output file and write image data */
     FILE *out = fopen(argv[4], "wb");

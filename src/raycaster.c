@@ -147,12 +147,12 @@ void raycast_scene(image *img, double cam_width, double cam_height, object *obje
                     case CAMERA:
                         break;
                     case SPHERE:
-                        t = sphere_intersect(Ro, Rd, objects[o].sph.position,
-                                             objects[o].sph.radius);
+                        t = sphere_intersect(Ro, Rd, objects[o].sphere.position,
+                                             objects[o].sphere.radius);
                         break;
                     case PLANE:
-                        t = plane_intersect(Ro, Rd, objects[o].pln.position,
-                                            objects[o].pln.normal);
+                        t = plane_intersect(Ro, Rd, objects[o].plane.position,
+                                            objects[o].plane.normal);
                         break;
                     default:
                         // Error
@@ -167,11 +167,12 @@ void raycast_scene(image *img, double cam_width, double cam_height, object *obje
                 //printf("#");    // ascii ray tracer "hit"
                 //printf("type: %d\n", objects[best_i].type);
                 if (objects[best_o].type == PLANE) {
-                    shade_pixel(objects[best_o].pln.color, i, j, img);
+                    // TODO: change these calls to account for diffuse and specular
+                    shade_pixel(objects[best_o].plane.spec_color, i, j, img);
                 }
                 else if (objects[best_o].type == SPHERE) {
                     //printf("shade\n");
-                    shade_pixel(objects[best_o].sph.color, i, j, img);
+                    shade_pixel(objects[best_o].sphere.spec_color, i, j, img);
                 }
             }
             else {

@@ -10,6 +10,7 @@
 #include <math.h>
 #include "ppmrw.h"
 #include "json.h"
+#include "base.h"
 
 /* custom types */
 typedef struct ray_t {

@@ -172,7 +172,7 @@ void read_json(FILE *json) {
     int counter = 0;
 
     // find the objects
-    while (1) {
+    while (true) {
         //c  = next_c(json);
         if (counter > MAX_OBJECTS) {
             fprintf(stderr, "Error: read_json: Number of objects is too large: %d\n", line);
@@ -215,7 +215,7 @@ void read_json(FILE *json) {
 
             skip_ws(json);
 
-            while (1) {
+            while (true) {
                 //  , }
                 c = next_c(json);
                 if (c == '}') {
@@ -235,7 +235,7 @@ void read_json(FILE *json) {
                             fprintf(stderr, "Error: read_json: width must be positive: %d\n", line);
                             exit(1);
                         }
-                        objects[counter].cam.width = temp;
+                        objects[counter].camera.width = temp;
 
                     }
                     else if (strcmp(key, "height") == 0) {
@@ -244,7 +244,7 @@ void read_json(FILE *json) {
                             fprintf(stderr, "Error: read_json: height must be positive: %d\n", line);
                             exit(1);
                         }
-                        objects[counter].cam.height = temp;
+                        objects[counter].camera.height = temp;
                     }
                     else if (strcmp(key, "radius") == 0) {
                         double temp = next_number(json);
@@ -252,13 +252,23 @@ void read_json(FILE *json) {
                             fprintf(stderr, "Error: read_json: radius must be positive: %d\n", line);
                             exit(1);
                         }
-                        objects[counter].sph.radius = temp;
+                        objects[counter].sphere.radius = temp;
                     }
-                    else if (strcmp(key, "color") == 0) {
+                    else if (strcmp(key, "specular_color") == 0) {
                         if (obj_type == SPHERE)
-                            objects[counter].sph.color = next_rgb_color(json);
+                            objects[counter].sphere.spec_color = next_rgb_color(json);
                         else if (obj_type == PLANE)
-                            objects[counter].pln.color = next_rgb_color(json);
+                            objects[counter].plane.spec_color = next_rgb_color(json);
+                        else {
+                            fprintf(stderr, "Error: read_json: Color vector can't be applied here: %d\n", line);
+                            exit(1);
+                        }
+                    }
+                    else if (strcmp(key, "diffuse_color") == 0) {
+                        if (obj_type == SPHERE)
+                            objects[counter].sphere.diff_color = next_rgb_color(json);
+                        else if (obj_type == PLANE)
+                            objects[counter].plane.diff_color = next_rgb_color(json);
                         else {
                             fprintf(stderr, "Error: read_json: Color vector can't be applied here: %d\n", line);
                             exit(1);
@@ -266,9 +276,9 @@ void read_json(FILE *json) {
                     }
                     else if (strcmp(key, "position") == 0) {
                         if (obj_type == SPHERE)
-                            objects[counter].sph.position = next_vector(json);
+                            objects[counter].sphere.position = next_vector(json);
                         else if (obj_type == PLANE)
-                            objects[counter].pln.position = next_vector(json);
+                            objects[counter].plane.position = next_vector(json);
                         else {
                             fprintf(stderr, "Error: read_json: Position vector can't be applied here: %d\n", line);
                             exit(1);
@@ -281,7 +291,7 @@ void read_json(FILE *json) {
                             exit(1);
                         }
                         else
-                            objects[counter].pln.normal = next_vector(json);
+                            objects[counter].plane.normal = next_vector(json);
                     }
                     else {
                         fprintf(stderr, "Error: read_json: '%s' not a valid object: %d\n", key, line);
@@ -323,28 +333,29 @@ void print_objects(object *obj) {
     while (i < MAX_OBJECTS && obj[i].type > 0) {
         printf("object type: %d\n", obj[i].type);
         if (obj[i].type == CAMERA) {
-            printf("height: %lf\n", obj[i].cam.height);
-            printf("width: %lf\n", obj[i].cam.width);
+            printf("height: %lf\n", obj[i].camera.height);
+            printf("width: %lf\n", obj[i].camera.width);
         }
+            // TODO: add printing of diffuse colors as well
         else if (obj[i].type == SPHERE) {
-            printf("color: %lf %lf %lf\n", obj[i].sph.color[0],
-                   obj[i].sph.color[1],
-                   obj[i].sph.color[2]);
-            printf("position: %lf %lf %lf\n", obj[i].sph.position[0],
-                   obj[i].sph.position[1],
-                   obj[i].sph.position[2]);
-            printf("radius: %lf\n", obj[i].sph.radius);
+            printf("color: %lf %lf %lf\n", obj[i].sphere.spec_color[0],
+                   obj[i].sphere.spec_color[1],
+                   obj[i].sphere.spec_color[2]);
+            printf("position: %lf %lf %lf\n", obj[i].sphere.position[0],
+                   obj[i].sphere.position[1],
+                   obj[i].sphere.position[2]);
+            printf("radius: %lf\n", obj[i].sphere.radius);
         }
         else if (obj[i].type == PLANE) {
-            printf("color: %lf %lf %lf\n", obj[i].pln.color[0],
-                   obj[i].pln.color[1],
-                   obj[i].pln.color[2]);
-            printf("position: %lf %lf %lf\n", obj[i].pln.position[0],
-                   obj[i].pln.position[1],
-                   obj[i].pln.position[2]);
-            printf("normal: %lf %lf %lf\n", obj[i].pln.normal[0],
-                   obj[i].pln.normal[1],
-                   obj[i].pln.normal[2]);
+            printf("color: %lf %lf %lf\n", obj[i].plane.spec_color[0],
+                   obj[i].plane.spec_color[1],
+                   obj[i].plane.spec_color[2]);
+            printf("position: %lf %lf %lf\n", obj[i].plane.position[0],
+                   obj[i].plane.position[1],
+                   obj[i].plane.position[2]);
+            printf("normal: %lf %lf %lf\n", obj[i].plane.normal[0],
+                   obj[i].plane.normal[1],
+                   obj[i].plane.normal[2]);
         }
         else {
             printf("unsupported value\n");

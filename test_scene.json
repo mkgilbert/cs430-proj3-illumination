@@ -8,13 +8,13 @@
     {
         "type": "sphere",
         "radius": 5.0,
-        "color": [1.0, 1.0, 0.0],
+        "specular_color": [1.0, 1.0, 0.0],
         "position": [1.0, 3.0, 30.0]
     },
 
     {
         "type": "plane",
-        "color": [0.2, 0.0, 1.0],
+        "specular_color": [0.2, 0.0, 1.0],
         "position": [1.0, 3.0, 40.0],
         "normal": [2.0, 3.5, 0]
     }
