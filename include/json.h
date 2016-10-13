@@ -53,13 +53,13 @@ typedef struct object_t {
         Camera camera;
         Sphere sphere;
         Plane plane;
-        Light light;
     };
 } object;
 
 /* global variables */
 extern int line;
 extern object objects[MAX_OBJECTS];
+extern Light lights[MAX_OBJECTS];
 
 /* function definitions */
 void read_json(FILE *json);

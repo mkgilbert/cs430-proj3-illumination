@@ -14,6 +14,8 @@
 /* global variables */
 int line = 1;                   // global var for line numbers as we parse
 object objects[MAX_OBJECTS];    // allocate space for all objects in json file
+Light lights[MAX_OBJECTS];      // allocate space for lights
+
 
 /* helper functions */
 
@@ -169,12 +171,13 @@ void read_json(FILE *json) {
     }
     skip_ws(json);
 
-    int counter = 0;
+    int obj_counter = 0;
+    int light_counter = 0;
 
     // find the objects
     while (true) {
         //c  = next_c(json);
-        if (counter > MAX_OBJECTS) {
+        if (obj_counter > MAX_OBJECTS) {
             fprintf(stderr, "Error: read_json: Number of objects is too large: %d\n", line);
             exit(1);
         }
@@ -199,15 +202,18 @@ void read_json(FILE *json) {
             int obj_type;
             if (strcmp(type, "camera") == 0) {
                 obj_type = CAMERA;
-                objects[counter].type = CAMERA;
+                objects[obj_counter].type = CAMERA;
             }
             else if (strcmp(type, "sphere") == 0) {
                 obj_type = SPHERE;
-                objects[counter].type = SPHERE;
+                objects[obj_counter].type = SPHERE;
             }
             else if (strcmp(type, "plane") == 0) {
                 obj_type = PLANE;
-                objects[counter].type = PLANE;
+                objects[obj_counter].type = PLANE;
+            }
+            else if (strcmp(type, "light") == 0) {
+                obj_type = LIGHT;
             }
             else {
                 exit(1);
@@ -235,7 +241,7 @@ void read_json(FILE *json) {
                             fprintf(stderr, "Error: read_json: width must be positive: %d\n", line);
                             exit(1);
                         }
-                        objects[counter].camera.width = temp;
+                        objects[obj_counter].camera.width = temp;
 
                     }
                     else if (strcmp(key, "height") == 0) {
@@ -244,7 +250,7 @@ void read_json(FILE *json) {
                             fprintf(stderr, "Error: read_json: height must be positive: %d\n", line);
                             exit(1);
                         }
-                        objects[counter].camera.height = temp;
+                        objects[obj_counter].camera.height = temp;
                     }
                     else if (strcmp(key, "radius") == 0) {
                         double temp = next_number(json);
@@ -252,7 +258,7 @@ void read_json(FILE *json) {
                             fprintf(stderr, "Error: read_json: radius must be positive: %d\n", line);
                             exit(1);
                         }
-                        objects[counter].sphere.radius = temp;
+                        objects[obj_counter].sphere.radius = temp;
                     }
                     else if (strcmp(key, "radial-a0") == 0) {
                         double rad_a = next_number(json);
@@ -260,7 +266,7 @@ void read_json(FILE *json) {
                             fprintf(stderr, "Error: read_json: radial-a0 must be positive: %d\n", line);
                             exit(1);
                         }
-                        objects[counter].light.rad_att0 = rad_a;
+                        lights[light_counter].rad_att0 = rad_a;
                     }
                     else if (strcmp(key, "radial-a1") == 0) {
                         double rad_a = next_number(json);
@@ -268,7 +274,7 @@ void read_json(FILE *json) {
                             fprintf(stderr, "Error: read_json: radial-a1 must be positive: %d\n", line);
                             exit(1);
                         }
-                        objects[counter].light.rad_att1 = rad_a;
+                        lights[light_counter].rad_att1 = rad_a;
                     }
                     else if (strcmp(key, "radial-a2") == 0) {
                         double rad_a = next_number(json);
@@ -276,7 +282,7 @@ void read_json(FILE *json) {
                             fprintf(stderr, "Error: read_json: radial-a2 must be positive: %d\n", line);
                             exit(1);
                         }
-                        objects[counter].light.rad_att2 = rad_a;
+                        lights[light_counter].rad_att2 = rad_a;
                     }
                     else if (strcmp(key, "angular-a0") == 0) {
                         double ang_a = next_number(json);
@@ -284,20 +290,20 @@ void read_json(FILE *json) {
                             fprintf(stderr, "Error: read_json: angular-a0 must be positive: %d\n", line);
                             exit(1);
                         }
-                        objects[counter].light.ang_att0 = ang_a;
+                        lights[light_counter].ang_att0 = ang_a;
                     }
                     else if (strcmp(key, "color") == 0) {
                         if (obj_type != LIGHT) {
                             fprintf(stderr, "Error: Just plain 'color' vector can only be applied to a light object\n");
                             exit(1);
                         }
-                        objects[counter].light.color = next_rgb_color(json);
+                        lights[light_counter].color = next_rgb_color(json);
                     }
                     else if (strcmp(key, "specular_color") == 0) {
                         if (obj_type == SPHERE)
-                            objects[counter].sphere.spec_color = next_rgb_color(json);
+                            objects[obj_counter].sphere.spec_color = next_rgb_color(json);
                         else if (obj_type == PLANE)
-                            objects[counter].plane.spec_color = next_rgb_color(json);
+                            objects[obj_counter].plane.spec_color = next_rgb_color(json);
                         else {
                             fprintf(stderr, "Error: read_json: speculaor_color vector can't be applied here: %d\n", line);
                             exit(1);
@@ -305,9 +311,9 @@ void read_json(FILE *json) {
                     }
                     else if (strcmp(key, "diffuse_color") == 0) {
                         if (obj_type == SPHERE)
-                            objects[counter].sphere.diff_color = next_rgb_color(json);
+                            objects[obj_counter].sphere.diff_color = next_rgb_color(json);
                         else if (obj_type == PLANE)
-                            objects[counter].plane.diff_color = next_rgb_color(json);
+                            objects[obj_counter].plane.diff_color = next_rgb_color(json);
                         else {
                             fprintf(stderr, "Error: read_json: diffuse_color vector can't be applied here: %d\n", line);
                             exit(1);
@@ -315,9 +321,9 @@ void read_json(FILE *json) {
                     }
                     else if (strcmp(key, "position") == 0) {
                         if (obj_type == SPHERE)
-                            objects[counter].sphere.position = next_vector(json);
+                            objects[obj_counter].sphere.position = next_vector(json);
                         else if (obj_type == PLANE)
-                            objects[counter].plane.position = next_vector(json);
+                            objects[obj_counter].plane.position = next_vector(json);
                         else {
                             fprintf(stderr, "Error: read_json: Position vector can't be applied here: %d\n", line);
                             exit(1);
@@ -330,7 +336,7 @@ void read_json(FILE *json) {
                             exit(1);
                         }
                         else
-                            objects[counter].plane.normal = next_vector(json);
+                            objects[obj_counter].plane.normal = next_vector(json);
                     }
                     else {
                         fprintf(stderr, "Error: read_json: '%s' not a valid object: %d\n", key, line);
@@ -361,7 +367,8 @@ void read_json(FILE *json) {
             }
         }
         c = next_c(json);
-        counter++;
+        obj_counter++;
+        light_counter++;
     }
     fclose(json);
 }
