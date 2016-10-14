@@ -15,7 +15,8 @@
 int line = 1;                   // global var for line numbers as we parse
 object objects[MAX_OBJECTS];    // allocate space for all objects in json file
 Light lights[MAX_OBJECTS];      // allocate space for lights
-
+int nlights;
+int nobjects;
 
 /* helper functions */
 
@@ -184,7 +185,7 @@ void read_json(FILE *json) {
         if (c == ']') {
             fprintf(stderr, "Error: read_json: Unexpected ']': %d\n", line);
             fclose(json);
-            return;
+            exit(1);
         }
         if (c == '{') {     // found an object
             skip_ws(json);
@@ -359,6 +360,8 @@ void read_json(FILE *json) {
             }
             else if (c == ']') {
                 fclose(json);
+                nlights = light_counter;    // set global variables
+                nobjects = obj_counter;
                 return;
             }
             else {
@@ -370,7 +373,6 @@ void read_json(FILE *json) {
         obj_counter++;
         light_counter++;
     }
-    fclose(json);
 }
 
 /* testing/debug functions */

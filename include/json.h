@@ -60,6 +60,8 @@ typedef struct object_t {
 extern int line;
 extern object objects[MAX_OBJECTS];
 extern Light lights[MAX_OBJECTS];
+extern int nlights;
+extern int nobjects;
 
 /* function definitions */
 void read_json(FILE *json);

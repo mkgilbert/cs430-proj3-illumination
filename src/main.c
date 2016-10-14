@@ -57,9 +57,9 @@ int main(int argc, char *argv[]) {
     }
 
     create_ppm(out, 6, &img);
-
     /* cleanup */
     fclose(out);
+    free(img.pixmap);
 
     return 0;
 }

@@ -16,7 +16,7 @@
 typedef struct ray_t {
     double origin[3];
     double direction[3];
-} ray;
+} Ray;
 
 /* functions */
 void raycast_scene(image*, double, double, object*);
