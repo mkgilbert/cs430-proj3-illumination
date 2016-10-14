@@ -9,4 +9,6 @@ void calculate_diffuse(double *normal_vector,
                        double *light_color,
                        double *obj_color,
                        double *out_color);
+
+double clamp(double color_val);
 #endif //CS430_PROJ3_ILLUMINATION_ILLUMINATION_H

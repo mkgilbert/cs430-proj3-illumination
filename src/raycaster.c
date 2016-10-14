@@ -40,9 +40,9 @@ int get_camera(object *objects) {
 void shade_pixel(double *color, int row, int col, image *img) {
     // fill in pixel color values
     // the color vals are stored as values between 0 and 1, so we need to adjust
-    img->pixmap[row * img->width + col].r = color[0];
-    img->pixmap[row * img->width + col].g = color[1];
-    img->pixmap[row * img->width + col].b = color[2];
+    img->pixmap[row * img->width + col].r = (unsigned char)clamp(color[0]);
+    img->pixmap[row * img->width + col].g = (unsigned char)clamp(color[1]);
+    img->pixmap[row * img->width + col].b = (unsigned char)clamp(color[2]);
 }
 
 /** Tests for an intersection between a ray and a plane
@@ -218,8 +218,12 @@ void shade(Ray *ray, int obj_index, double t, double color[3]) {
         //double camera_vector[3] = {ray->direction[0], ray->direction[1], ray->direction[2]};
         double diffuse[3];
         //double specular[3];
-        calculate_diffuse(normal_vector, light_vector, lights[i].color, obj_diff_color, diffuse);
 
+        calculate_diffuse(normal_vector, light_vector, lights[i].color, obj_diff_color, diffuse);
+        // TODO: calculate frad(), fang(), and specular
+        color[0] += diffuse[0];
+        color[1] += diffuse[1];
+        color[2] += diffuse[2];
     }
 }
 

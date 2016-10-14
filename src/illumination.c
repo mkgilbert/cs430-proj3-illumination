@@ -5,6 +5,20 @@
 #include "../include/illumination.h"
 #include "../include/vector_math.h"
 
+/**
+ * Clamps colors -- makes sure they are within a certain range. We don't want values outside of 0-1
+ * @param color_val
+ * @return the clamped color value
+ */
+double clamp(double color_val){
+    if (color_val < 0)
+        return 0;
+    else if (color_val > 1)
+        return 1;
+    else
+        return color_val;
+}
+
 void calculate_diffuse(double *normal_vector,
                        double *light_vector,
                        double *light_color,
