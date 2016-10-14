@@ -12,6 +12,8 @@
 #include "json.h"
 #include "base.h"
 
+#define MAX_COLOR_VAL 255   // maximum color to support for RGB
+
 /* custom types */
 typedef struct ray_t {
     double origin[3];

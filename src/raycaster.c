@@ -40,9 +40,9 @@ int get_camera(object *objects) {
 void shade_pixel(double *color, int row, int col, image *img) {
     // fill in pixel color values
     // the color vals are stored as values between 0 and 1, so we need to adjust
-    img->pixmap[row * img->width + col].r = (unsigned char)clamp(color[0]);
-    img->pixmap[row * img->width + col].g = (unsigned char)clamp(color[1]);
-    img->pixmap[row * img->width + col].b = (unsigned char)clamp(color[2]);
+    img->pixmap[row * img->width + col].r = (unsigned char)(MAX_COLOR_VAL * clamp(color[0]));
+    img->pixmap[row * img->width + col].g = (unsigned char)(MAX_COLOR_VAL * clamp(color[1]));
+    img->pixmap[row * img->width + col].b = (unsigned char)(MAX_COLOR_VAL * clamp(color[2]));
 }
 
 /** Tests for an intersection between a ray and a plane

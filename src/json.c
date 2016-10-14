@@ -9,8 +9,6 @@
 #include <ctype.h>
 #include "../include/json.h"
 
-#define MAX_COLOR_VAL 255       // maximum value to use for colors 0-255
-
 /* global variables */
 int line = 1;                   // global var for line numbers as we parse
 object objects[MAX_OBJECTS];    // allocate space for all objects in json file
@@ -69,7 +67,14 @@ double next_number(FILE* json) {
 
 /* since we could use 0-255 or 0-1 or whatever, this function checks bounds */
 int check_color_val(double v) {
-    if (v < 0.0 || v > MAX_COLOR_VAL)
+    if (v < 0.0 || v > 1.0)
+        return 0;
+    return 1;
+}
+
+/* check bounds for colors in json light objects. These can be anything >= 0 */
+int check_light_color_val(double v) {
+    if (v < 0.0)
         return 0;
     return 1;
 }
@@ -95,28 +100,39 @@ double* next_vector(FILE* json) {
 }
 
 /* Checks that the next 3 values in the FILE are valid rgb numbers */
-double* next_rgb_color(FILE* json) {
+double* next_color(FILE* json, boolean is_rgb) {
     double* v = malloc(sizeof(double)*3);
     skip_ws(json);
     expect_c(json, '[');
     skip_ws(json);
-    v[0] = MAX_COLOR_VAL * next_number(json);
+    v[0] = next_number(json);
     skip_ws(json);
     expect_c(json, ',');
     skip_ws(json);
-    v[1] = MAX_COLOR_VAL * next_number(json);
+    v[1] = next_number(json);
     skip_ws(json);
     expect_c(json, ',');
     skip_ws(json);
-    v[2] = MAX_COLOR_VAL * next_number(json);
+    v[2] = next_number(json);
     skip_ws(json);
     expect_c(json, ']');
     // check that all values are valid
-    if (!check_color_val(v[0]) ||
-        !check_color_val(v[1]) ||
-        !check_color_val(v[2])) {
-        fprintf(stderr, "Error: next_rgb_color: rgb value out of range: %d\n", line);
-        exit(1);
+    if (is_rgb) {
+        if (!check_color_val(v[0]) ||
+            !check_color_val(v[1]) ||
+            !check_color_val(v[2])) {
+            fprintf(stderr, "Error: next_color: rgb value out of range: %d\n", line);
+            exit(1);
+        }
+    }
+    else {
+        if (!check_light_color_val(v[0]) ||
+            !check_light_color_val(v[1]) ||
+            !check_light_color_val(v[2])) {
+            fprintf(stderr, "Error: next_color: light value out of range: %d\n", line);
+            exit(1);
+        }
+
     }
     return v;
 }
@@ -298,13 +314,13 @@ void read_json(FILE *json) {
                             fprintf(stderr, "Error: Just plain 'color' vector can only be applied to a light object\n");
                             exit(1);
                         }
-                        lights[light_counter].color = next_rgb_color(json);
+                        lights[light_counter].color = next_color(json, false);
                     }
                     else if (strcmp(key, "specular_color") == 0) {
                         if (obj_type == SPHERE)
-                            objects[obj_counter].sphere.spec_color = next_rgb_color(json);
+                            objects[obj_counter].sphere.spec_color = next_color(json, true);
                         else if (obj_type == PLANE)
-                            objects[obj_counter].plane.spec_color = next_rgb_color(json);
+                            objects[obj_counter].plane.spec_color = next_color(json, true);
                         else {
                             fprintf(stderr, "Error: read_json: speculaor_color vector can't be applied here: %d\n", line);
                             exit(1);
@@ -312,9 +328,9 @@ void read_json(FILE *json) {
                     }
                     else if (strcmp(key, "diffuse_color") == 0) {
                         if (obj_type == SPHERE)
-                            objects[obj_counter].sphere.diff_color = next_rgb_color(json);
+                            objects[obj_counter].sphere.diff_color = next_color(json, true);
                         else if (obj_type == PLANE)
-                            objects[obj_counter].plane.diff_color = next_rgb_color(json);
+                            objects[obj_counter].plane.diff_color = next_color(json, true);
                         else {
                             fprintf(stderr, "Error: read_json: diffuse_color vector can't be applied here: %d\n", line);
                             exit(1);
@@ -325,6 +341,8 @@ void read_json(FILE *json) {
                             objects[obj_counter].sphere.position = next_vector(json);
                         else if (obj_type == PLANE)
                             objects[obj_counter].plane.position = next_vector(json);
+                        else if (obj_type == LIGHT)
+                            lights[light_counter].position = next_vector(json);
                         else {
                             fprintf(stderr, "Error: read_json: Position vector can't be applied here: %d\n", line);
                             exit(1);
