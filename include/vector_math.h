@@ -56,6 +56,13 @@ static inline void v3_cross(V3 a, V3 b, V3 c) {
     c[2] = a[0]*b[1] - a[1]*b[0];
 }
 
+static inline void v3_reflect(V3 v, V3 n, V3 v_r) {
+    normalize(n);
+    double perp = 2.0 * v3_dot(n, v);
+    V3 tmp;
+    v3_scale(n, perp, tmp);
+    v3_sub(v, tmp, v_r);
+}
 
 /* testing/debug functions */
 //void print_v3(V3 data){
