@@ -462,10 +462,9 @@ void create_ppm(FILE *fh, int type, image *img) {
 
 /* TESTING helper functions */
 void print_pixels(RGBPixel *pixmap, int width, int height) {
-    int i,j;
     int counter = 0;
-    for (i=0; i<height; i++) {
-        for (j=0; j<width; j++) {
+    for (int i=0; i<height; i++) {
+        for (int j=0; j<width; j++) {
             counter++;
             printf("r: %d, ", pixmap[i * width + j].r);
             printf("g: %d ,", pixmap[i * width + j].g);

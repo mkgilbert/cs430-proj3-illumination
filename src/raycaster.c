@@ -13,6 +13,9 @@
 #include <string.h>
 #include <math.h>
 
+/* overall background color for the image */
+V3 background_color = {0, 0, 0};
+
 /**
  * Finds and gets the index in objects that has the camera width and height
  * @param objects - array of object types that represent the scene
@@ -217,13 +220,20 @@ void shade(Ray *ray, int obj_index, double t, double color[3]) {
             double specular[3];
             v3_zero(diffuse);
             v3_zero(specular);
-
+            normalize(L);
+            normalize(normal);
             calculate_diffuse(normal, L, lights[i].color, obj_diff_color, diffuse);
             calculate_specular(1, L, R, normal, V, obj_spec_color, lights[i].color, specular);
             // TODO: calculate frad(), fang(), and specular
-            color[0] += (specular[0] + diffuse[0]);
-            color[1] += (specular[1] + diffuse[1]);
-            color[2] += (specular[2] + diffuse[2]);
+            //color[0] += (specular[0] + diffuse[0]);
+            //color[1] += (specular[1] + diffuse[1]);
+            //color[2] += (specular[2] + diffuse[2]);
+            color[0] += diffuse[0];
+            color[1] += diffuse[1];
+            color[2] += diffuse[2];
+            //color[0] += specular[0];
+            //color[1] += specular[1];
+            //color[2] += specular[2];
         }
         // there was an object in the way, so we don't do anything. It's shadow
     }
@@ -240,15 +250,12 @@ void shade(Ray *ray, int obj_index, double t, double color[3]) {
 void raycast_scene(image *img, double cam_width, double cam_height, object *objects) {
     // loop over all pixels and test for intesections with objects.
     // store results in pixmap
-    //int i;  // x coord iterator
-    //int j;  // y coord iterator
     double vp_pos[3] = {0, 0, 1};   // view plane position
     //double Ro[3] = {0, 0, 0};       // camera position (ray origin)
     double point[3] = {0, 0, 0};    // point on viewplane where intersection happens
 
     double pixheight = (double)cam_height / (double)img->height;
     double pixwidth = (double)cam_width / (double)img->width;
-    //double Rd[3] = {0, 0, 0};       // direction of Ray
 
     Ray ray = {
             .origin = {0, 0, 0},
@@ -257,33 +264,28 @@ void raycast_scene(image *img, double cam_width, double cam_height, object *obje
 
     for (int i = 0; i < img->height; i++) {
         for (int j = 0; j < img->width; j++) {
+            v3_zero(ray.origin);
+            v3_zero(ray.direction);
             point[0] = vp_pos[0] - cam_width/2.0 + pixwidth*(j + 0.5);
             point[1] = -(vp_pos[1] - cam_height/2.0 + pixheight*(i + 0.5));
             point[2] = vp_pos[2];    // set intersecting point Z to viewplane Z
             normalize(point);   // normalize the point
             // store normalized point as our ray direction
             v3_copy(point, ray.direction);
+            double color[3] = {0, 0, 0};
 
-            int best_o = -1;     // index of 'best' or closest object
-            double best_t = INFINITY;  // closest distance
+            int best_o;     // index of 'best' or closest object
+            double best_t;  // closest distance
             get_dist_and_idx_closest_obj(&ray, -1, INFINITY, &best_o, &best_t);
 
             // set ambient color
-            //double *color = malloc(sizeof(double)*3);
-            double color[3];
-            color[0] = 0;
-            color[1] = 0;
-            color[2] = 0;
-
             if (best_t > 0 && best_t != INFINITY && best_o != -1) {// there was an intersection
-                //printf("#");    // ascii ray tracer "hit"
-                //printf("type: %d\n", objects[best_i].type);
                 shade(&ray, best_o, best_t, color);
                 shade_pixel(color, i, j, img);
-                //shade_pixel(objects[best_o].plane.diff_color, i, j, img);
+                //shade_pixel(objects[best_o].sphere.diff_color, i, j, img);
             }
             else {
-                //printf(".");    // ascii ray tracer "miss"
+                shade_pixel(background_color, i, j, img);
             }
         }
         //printf("\n");

@@ -40,6 +40,7 @@ int main(int argc, char *argv[]) {
     img.width = atoi(argv[1]);
     img.height = atoi(argv[2]);
     img.pixmap = (RGBPixel*) malloc(sizeof(RGBPixel)*img.width*img.height);
+    //print_pixels(img.pixmap, img.width, img.height);
     int pos = get_camera(objects);
     if (pos == -1) {
         fprintf(stderr, "Error: main: No camera object found in data\n");
@@ -55,17 +56,9 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Error: main: Failed to create output file '%s'\n", argv[4]);
         exit(1);
     }
-
     create_ppm(out, 6, &img);
     /* cleanup */
     fclose(out);
-    free(img.pixmap);
-
-    V3 a = {3, 0, 4};
-    V3 b = {-3, 0, 4};
-    V3 c;
-    v3_reflect(a, b, c);
-    printf("%lf %lf %lf\n", c[0], c[1], c[2]);
 
     return 0;
 }
