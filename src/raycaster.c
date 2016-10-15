@@ -184,40 +184,43 @@ void shade(Ray *ray, int obj_index, double t, double color[3]) {
         // new check new ray for intersections with other objects
         get_dist_and_idx_closest_obj(&ray_new, obj_index, distance_to_light, &best_o, &best_t);
 
-        double normal_vector[3];
+        double normal[3];
         double obj_diff_color[3];
+        double obj_spec_color[3];
         if (best_o == -1) { // this means there was no object in the way between the current one and the light
-            v3_zero(normal_vector); // zero out these vectors each time
+            v3_zero(normal); // zero out these vectors each time
             v3_zero(obj_diff_color);
-            //double obj_spec_color[3];
+            v3_zero(obj_spec_color);
+
             // find normal and color
             if (objects[obj_index].type == PLANE) {
-                v3_copy(objects[obj_index].plane.normal, normal_vector);
+                v3_copy(objects[obj_index].plane.normal, normal);
                 v3_copy(objects[obj_index].plane.diff_color, obj_diff_color);
-                /*obj_spec_color[0] = objects[obj_index].plane.spec_color[0];
-                obj_spec_color[1] = objects[obj_index].plane.spec_color[1];
-                obj_spec_color[2] = objects[obj_index].plane.spec_color[2];*/
+                v3_copy(objects[obj_index].plane.spec_color, obj_spec_color);
             } else if (objects[obj_index].type == SPHERE) {
-                v3_sub(ray_new.origin, objects[obj_index].sphere.position, normal_vector);
+                // find normal of our current intersection on the sphere
+                v3_sub(ray_new.origin, objects[obj_index].sphere.position, normal);
+                // copy the colors into temp variables
                 v3_copy(objects[obj_index].sphere.diff_color, obj_diff_color);
-                /*obj_spec_color[0] = objects[obj_index].sphere.spec_color[0];
-                obj_spec_color[1] = objects[obj_index].sphere.spec_color[1];
-                obj_spec_color[2] = objects[obj_index].sphere.spec_color[2];*/
+                v3_copy(objects[obj_index].sphere.spec_color, obj_spec_color);
             } else {
                 fprintf(stderr, "Error: shade: Trying to shade unsupported type of object\n");
                 exit(1);
             }
-            //printf("%lf %lf %lf\n", obj_spec_color[0], obj_spec_color[1], obj_spec_color[2]);
             // find light, reflection and camera vectors
-            double light_vector[3] = {ray_new.direction[0], ray_new.direction[1], ray_new.direction[2]};
-            double reflection_vector[3];
-            v3_reflect(light_vector, normal_vector, reflection_vector);
+            double L[3];
+            double R[3];
+            double V[3];
+            v3_reflect(L, normal, R);
+            v3_copy(ray_new.direction, L);
+            v3_copy(ray->direction, V);
             //double camera_vector[3] = {ray->direction[0], ray->direction[1], ray->direction[2]};
             double diffuse[3];
-            //double specular[3];
+            double specular[3];
             v3_zero(diffuse);
+            v3_zero(specular);
 
-            calculate_diffuse(normal_vector, light_vector, lights[i].color, obj_diff_color, diffuse);
+            calculate_diffuse(normal, L, lights[i].color, obj_diff_color, diffuse);
             // TODO: calculate frad(), fang(), and specular
             color[0] += diffuse[0];
             color[1] += diffuse[1];
