@@ -112,10 +112,9 @@ double sphere_intersect(Ray *ray, double *C, double r) {
  * @param ret_best_t - the distance of the closest object
  */
 void get_dist_and_idx_closest_obj(Ray *ray, int self_index, double max_distance, int *ret_index, double *ret_best_t) {
-    int i;
     int best_o = -1;
     double best_t = INFINITY;
-    for (i=0; objects[i].type != 0; i++) {
+    for (int i=0; objects[i].type != 0; i++) {
         // if self_index was passed in as > 0, we must ignore object i because we are checking distance to another
         // object from the one at self_index.
         if (self_index == i) continue;
@@ -214,17 +213,17 @@ void shade(Ray *ray, int obj_index, double t, double color[3]) {
             v3_reflect(L, normal, R);
             v3_copy(ray_new.direction, L);
             v3_copy(ray->direction, V);
-            //double camera_vector[3] = {ray->direction[0], ray->direction[1], ray->direction[2]};
             double diffuse[3];
             double specular[3];
             v3_zero(diffuse);
             v3_zero(specular);
 
             calculate_diffuse(normal, L, lights[i].color, obj_diff_color, diffuse);
+            calculate_specular(1, L, R, normal, V, obj_spec_color, lights[i].color, specular);
             // TODO: calculate frad(), fang(), and specular
-            color[0] += diffuse[0];
-            color[1] += diffuse[1];
-            color[2] += diffuse[2];
+            color[0] += (specular[0] + diffuse[0]);
+            color[1] += (specular[1] + diffuse[1]);
+            color[2] += (specular[2] + diffuse[2]);
         }
         // there was an object in the way, so we don't do anything. It's shadow
     }

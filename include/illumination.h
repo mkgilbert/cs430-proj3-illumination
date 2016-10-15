@@ -10,5 +10,13 @@ void calculate_diffuse(double *normal_vector,
                        double *obj_color,
                        double *out_color);
 
+void calculate_specular(double ns,
+                        double *L,
+                        double *R,
+                        double *N,
+                        double *V,
+                        double *KS,
+                        double *IL,
+                        double *out_color);
 double clamp(double color_val);
 #endif //CS430_PROJ3_ILLUMINATION_ILLUMINATION_H
