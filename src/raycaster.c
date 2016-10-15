@@ -107,10 +107,11 @@ double sphere_intersect(Ray *ray, double *C, double r) {
  *
  * @param ray - the ray we are shooting out to find an intersection with
  * @param self_index - if < 0, ignore this. If >= 0, it is the index of the object we are getting distance FROM
+ * @param max_distance - This is the maximum distance we care to check. e.g. distance to a light source
  * @param ret_index - the index in objects array of the closest object we intersected
  * @param ret_best_t - the distance of the closest object
  */
-void get_dist_and_idx_closest_obj(Ray *ray, int self_index, int *ret_index, double *ret_best_t) {
+void get_dist_and_idx_closest_obj(Ray *ray, int self_index, double max_distance, int *ret_index, double *ret_best_t) {
     //TODO: possibly put another parameter for max_t...for "distance_to_light"...we wouldn't want to look at anything farther away than the light
     int i;
     int best_o = -1;
@@ -140,6 +141,8 @@ void get_dist_and_idx_closest_obj(Ray *ray, int self_index, int *ret_index, doub
                 // Error
                 exit(1);
         }
+        if (max_distance != INFINITY && t > max_distance)
+            continue;
         if (t > 0 && t < best_t) {
             best_t = t;
             best_o = i;
@@ -173,54 +176,49 @@ void shade(Ray *ray, int obj_index, double t, double color[3]) {
     for (int i=0; i<nlights; i++) {
 
         // find new ray direction
-        v3_sub(lights[i].position, new_origin, new_dir);
+        v3_sub(lights[i].position, ray_new.origin, ray_new.direction);
+        double distance_to_light = v3_len(ray_new.direction);
 
-        // TODO: closest_shadow_object = ...????
         int best_o;     // index of closest object
         double best_t;  // distance of closest object
 
         // new check new ray for intersections with other objects
         // TODO: maybe add param in this function call for max_t as distance_to_light?
-        get_dist_and_idx_closest_obj(&ray_new, obj_index, &best_o, &best_t);
+        get_dist_and_idx_closest_obj(&ray_new, obj_index, distance_to_light, &best_o, &best_t);
 
+        double normal_vector[3];
+        double obj_diff_color[3];
         if (best_o == -1) { // this means there was no object in the way between the current one and the light
             //TODO: if (closest_shadow_object == NULL) ?????
-            double normal_vector[3];
-            double obj_diff_color[3];
+            v3_zero(normal_vector); // zero out these vectors each time
+            v3_zero(obj_diff_color);
             //double obj_spec_color[3];
             // find normal and color
             if (objects[obj_index].type == PLANE) {
-                normal_vector[0] = objects[obj_index].plane.normal[0];
-                normal_vector[1] = objects[obj_index].plane.normal[1];
-                normal_vector[2] = objects[obj_index].plane.normal[2];
-                obj_diff_color[0] = objects[obj_index].plane.diff_color[0];
-                obj_diff_color[1] = objects[obj_index].plane.diff_color[1];
-                obj_diff_color[2] = objects[obj_index].plane.diff_color[2];
+                v3_copy(objects[obj_index].plane.normal, normal_vector);
+                v3_copy(objects[obj_index].plane.diff_color, obj_diff_color);
                 /*obj_spec_color[0] = objects[obj_index].plane.spec_color[0];
                 obj_spec_color[1] = objects[obj_index].plane.spec_color[1];
                 obj_spec_color[2] = objects[obj_index].plane.spec_color[2];*/
             } else if (objects[obj_index].type == SPHERE) {
                 v3_sub(ray_new.origin, objects[obj_index].sphere.position, normal_vector);
-                obj_diff_color[0] = objects[obj_index].sphere.diff_color[0];
-                obj_diff_color[1] = objects[obj_index].sphere.diff_color[1];
-                obj_diff_color[2] = objects[obj_index].sphere.diff_color[2];
+                v3_copy(objects[obj_index].sphere.diff_color, obj_diff_color);
                 /*obj_spec_color[0] = objects[obj_index].sphere.spec_color[0];
                 obj_spec_color[1] = objects[obj_index].sphere.spec_color[1];
                 obj_spec_color[2] = objects[obj_index].sphere.spec_color[2];*/
-            } else if (objects[obj_index].type == CAMERA) {
-                continue;
             } else {
                 fprintf(stderr, "Error: shade: Trying to shade unsupported type of object\n");
                 exit(1);
             }
             //printf("%lf %lf %lf\n", obj_spec_color[0], obj_spec_color[1], obj_spec_color[2]);
             // find light, reflection and camera vectors
-            double light_vector[3] = {ray_new.origin[0], ray_new.origin[1], ray_new.origin[2]};
+            double light_vector[3] = {ray_new.direction[0], ray_new.direction[1], ray_new.direction[2]};
             double reflection_vector[3];
             v3_reflect(light_vector, normal_vector, reflection_vector);
             //double camera_vector[3] = {ray->direction[0], ray->direction[1], ray->direction[2]};
             double diffuse[3];
             //double specular[3];
+            v3_zero(diffuse);
 
             calculate_diffuse(normal_vector, light_vector, lights[i].color, obj_diff_color, diffuse);
             // TODO: calculate frad(), fang(), and specular
@@ -265,25 +263,25 @@ void raycast_scene(image *img, double cam_width, double cam_height, object *obje
             point[2] = vp_pos[2];    // set intersecting point Z to viewplane Z
             normalize(point);   // normalize the point
             // store normalized point as our ray direction
-            ray.direction[0] = point[0];
-            ray.direction[1] = point[1];
-            ray.direction[2] = point[2];
+            v3_copy(point, ray.direction);
 
-            int best_o;     // index of 'best' or closest object
-            double best_t;  // closest distance
-            get_dist_and_idx_closest_obj(&ray, -1, &best_o, &best_t);
+            int best_o = -1;     // index of 'best' or closest object
+            double best_t = INFINITY;  // closest distance
+            get_dist_and_idx_closest_obj(&ray, -1, INFINITY, &best_o, &best_t);
 
             // set ambient color
-            double *color = malloc(sizeof(double)*3);
-            color[0] = 0.0;
-            color[1] = 0.0;
-            color[2] = 0.0;
+            //double *color = malloc(sizeof(double)*3);
+            double color[3];
+            color[0] = 0;
+            color[1] = 0;
+            color[2] = 0;
 
             if (best_t > 0 && best_t != INFINITY && best_o != -1) {// there was an intersection
                 //printf("#");    // ascii ray tracer "hit"
                 //printf("type: %d\n", objects[best_i].type);
                 shade(&ray, best_o, best_t, color);
                 shade_pixel(color, i, j, img);
+                //shade_pixel(objects[best_o].plane.diff_color, i, j, img);
             }
             else {
                 //printf(".");    // ascii ray tracer "miss"

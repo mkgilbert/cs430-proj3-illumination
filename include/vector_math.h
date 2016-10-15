@@ -16,6 +16,18 @@ static inline double sqr(double v) {
     return v*v;
 }
 
+static inline void v3_zero(V3 vector) {
+    vector[0] = 0;
+    vector[1] = 0;
+    vector[2] = 0;
+}
+
+static inline void v3_copy(V3 from, V3 to) {
+    to[0] = from[0];
+    to[1] = from[1];
+    to[2] = from[2];
+}
+
 static inline void normalize(double *v) {
     double len = sqr(v[0]) + sqr(v[1]) + sqr(v[2]);
     len = sqrt(len);
