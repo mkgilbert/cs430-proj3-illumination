@@ -58,10 +58,10 @@ static inline void v3_cross(V3 a, V3 b, V3 c) {
 
 static inline void v3_reflect(V3 v, V3 n, V3 v_r) {
     normalize(n);
-    double perp = 2.0 * v3_dot(n, v);
-    V3 tmp;
-    v3_scale(n, perp, tmp);
-    v3_sub(v, tmp, v_r);
+    double scalar = 2.0 * v3_dot(n, v);
+    V3 tmp_vector;
+    v3_scale(n, scalar, tmp_vector);
+    v3_sub(v, tmp_vector, v_r);
 }
 
 /* testing/debug functions */

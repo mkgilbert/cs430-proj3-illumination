@@ -61,5 +61,11 @@ int main(int argc, char *argv[]) {
     fclose(out);
     free(img.pixmap);
 
+    V3 a = {3, 0, 4};
+    V3 b = {-3, 0, 4};
+    V3 c;
+    v3_reflect(a, b, c);
+    printf("%lf %lf %lf\n", c[0], c[1], c[2]);
+
     return 0;
 }

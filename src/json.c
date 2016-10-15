@@ -190,9 +190,10 @@ void read_json(FILE *json) {
 
     int obj_counter = 0;
     int light_counter = 0;
-
+    int obj_type;
+    boolean not_done = true;
     // find the objects
-    while (true) {
+    while (not_done) {
         //c  = next_c(json);
         if (obj_counter > MAX_OBJECTS) {
             fprintf(stderr, "Error: read_json: Number of objects is too large: %d\n", line);
@@ -216,7 +217,6 @@ void read_json(FILE *json) {
             skip_ws(json);
 
             char *type = parse_string(json);
-            int obj_type;
             if (strcmp(type, "camera") == 0) {
                 obj_type = CAMERA;
                 objects[obj_counter].type = CAMERA;
@@ -377,20 +377,24 @@ void read_json(FILE *json) {
                 skip_ws(json);
             }
             else if (c == ']') {
-                fclose(json);
-                nlights = light_counter;    // set global variables
-                nobjects = obj_counter;
-                return;
+                not_done = false;
             }
             else {
                 fprintf(stderr, "Error: read_json: Expecting comma or ]: %d\n", line);
                 exit(1);
             }
         }
-        c = next_c(json);
-        obj_counter++;
-        light_counter++;
+        if (obj_type == LIGHT)
+            light_counter++;
+        else
+            obj_counter++;
+
+        if (not_done)
+            c = next_c(json);
     }
+    fclose(json);
+    nlights = light_counter;
+    nobjects = obj_counter;
 }
 
 /* testing/debug functions */
