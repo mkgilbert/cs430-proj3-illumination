@@ -112,7 +112,6 @@ double sphere_intersect(Ray *ray, double *C, double r) {
  * @param ret_best_t - the distance of the closest object
  */
 void get_dist_and_idx_closest_obj(Ray *ray, int self_index, double max_distance, int *ret_index, double *ret_best_t) {
-    //TODO: possibly put another parameter for max_t...for "distance_to_light"...we wouldn't want to look at anything farther away than the light
     int i;
     int best_o = -1;
     double best_t = INFINITY;
@@ -183,13 +182,11 @@ void shade(Ray *ray, int obj_index, double t, double color[3]) {
         double best_t;  // distance of closest object
 
         // new check new ray for intersections with other objects
-        // TODO: maybe add param in this function call for max_t as distance_to_light?
         get_dist_and_idx_closest_obj(&ray_new, obj_index, distance_to_light, &best_o, &best_t);
 
         double normal_vector[3];
         double obj_diff_color[3];
         if (best_o == -1) { // this means there was no object in the way between the current one and the light
-            //TODO: if (closest_shadow_object == NULL) ?????
             v3_zero(normal_vector); // zero out these vectors each time
             v3_zero(obj_diff_color);
             //double obj_spec_color[3];
