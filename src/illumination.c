@@ -39,7 +39,7 @@ void calculate_diffuse(double *N, double *L, double *IL, double *KD, double *out
 }
 
 void calculate_specular(double ns, double *L, double *R, double *N, double *V, double *KS, double *IL, double *out_color) {
-    double v_dot_r = v3_dot(L, R);
+    double v_dot_r = v3_dot(V, R);
     double n_dot_l = v3_dot(N, L);
     if (v_dot_r > 0 && n_dot_l > 0) {
         double vr_to_the_ns = pow(v_dot_r, ns);

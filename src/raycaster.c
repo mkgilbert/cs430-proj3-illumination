@@ -178,6 +178,7 @@ void shade(Ray *ray, int obj_index, double t, double color[3]) {
 
         // find new ray direction
         v3_sub(lights[i].position, ray_new.origin, ray_new.direction);
+        normalize(ray_new.direction);
         double distance_to_light = v3_len(ray_new.direction);
 
         int best_o;     // index of closest object
@@ -223,14 +224,14 @@ void shade(Ray *ray, int obj_index, double t, double color[3]) {
             normalize(L);
             normalize(normal);
             calculate_diffuse(normal, L, lights[i].color, obj_diff_color, diffuse);
-            calculate_specular(1, L, R, normal, V, obj_spec_color, lights[i].color, specular);
+            calculate_specular(100, L, R, normal, V, obj_spec_color, lights[i].color, specular);
             // TODO: calculate frad(), fang(), and specular
-            //color[0] += (specular[0] + diffuse[0]);
-            //color[1] += (specular[1] + diffuse[1]);
-            //color[2] += (specular[2] + diffuse[2]);
-            color[0] += diffuse[0];
-            color[1] += diffuse[1];
-            color[2] += diffuse[2];
+            color[0] += (specular[0] + diffuse[0]);
+            color[1] += (specular[1] + diffuse[1]);
+            color[2] += (specular[2] + diffuse[2]);
+            //color[0] += diffuse[0];
+            //color[1] += diffuse[1];
+            //color[2] += diffuse[2];
             //color[0] += specular[0];
             //color[1] += specular[1];
             //color[2] += specular[2];
@@ -272,7 +273,7 @@ void raycast_scene(image *img, double cam_width, double cam_height, object *obje
             normalize(point);   // normalize the point
             // store normalized point as our ray direction
             v3_copy(point, ray.direction);
-            double color[3] = {0, 0, 0};
+            double color[3] = {0.0, 0.0, 0.0};
 
             int best_o;     // index of 'best' or closest object
             double best_t;  // closest distance
