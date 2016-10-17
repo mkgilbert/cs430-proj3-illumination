@@ -84,7 +84,8 @@ double plane_intersect(Ray *ray, double *Pos, double *Norm) {
 double sphere_intersect(Ray *ray, double *C, double r) {
     double b, c;
     double vector_diff[3];
-    v3_sub(ray->direction, C, vector_diff);
+    //v3_sub(ray->direction, C, vector_diff);
+    v3_sub(ray->origin, C, vector_diff);
 
     // calculate quadratic formula
     b = 2 * (ray->direction[0]*vector_diff[0] + ray->direction[1]*vector_diff[1] + ray->direction[2]*vector_diff[2]);
@@ -153,6 +154,13 @@ void get_dist_and_idx_closest_obj(Ray *ray, int self_index, double max_distance,
     (*ret_best_t) = best_t;
 }
 
+double calculate_angular_att(Light *light, double direction_to_object[3]) {
+    //TODO: check if light is not a spotlight. if not, return 1.0
+    double v0_dot_vl = v3_dot(light->direction, direction_to_object);
+    double fang = pow(v0_dot_vl, light->ang_att0);
+    return fang;
+}
+
 /**
  *
  * @param ray - original ray -- starting point for testing shade
@@ -178,8 +186,8 @@ void shade(Ray *ray, int obj_index, double t, double color[3]) {
 
         // find new ray direction
         v3_sub(lights[i].position, ray_new.origin, ray_new.direction);
-        normalize(ray_new.direction);
         double distance_to_light = v3_len(ray_new.direction);
+        normalize(ray_new.direction);
 
         int best_o;     // index of closest object
         double best_t;  // distance of closest object
@@ -210,25 +218,35 @@ void shade(Ray *ray, int obj_index, double t, double color[3]) {
                 fprintf(stderr, "Error: shade: Trying to shade unsupported type of object\n");
                 exit(1);
             }
+            // added this ***
+            normalize(normal);
             // find light, reflection and camera vectors
             double L[3];
             double R[3];
             double V[3];
-            v3_reflect(L, normal, R);
             v3_copy(ray_new.direction, L);
+            normalize(L);
+            v3_reflect(L, normal, R);
             v3_copy(ray->direction, V);
             double diffuse[3];
             double specular[3];
             v3_zero(diffuse);
             v3_zero(specular);
-            normalize(L);
-            normalize(normal);
             calculate_diffuse(normal, L, lights[i].color, obj_diff_color, diffuse);
-            calculate_specular(100, L, R, normal, V, obj_spec_color, lights[i].color, specular);
+            calculate_specular(4, L, R, normal, V, obj_spec_color, lights[i].color, specular);
+
+            // calculate the angular and radial attenuation
+            double fang;
+            // get the vector from the object to the light
+            double obj_to_light_dir[3];
+            v3_copy(ray_new.direction, obj_to_light_dir);
+            v3_scale(obj_to_light_dir, -1, obj_to_light_dir);
+
+            fang = calculate_angular_att(&lights[i], obj_to_light_dir);
             // TODO: calculate frad(), fang(), and specular
-            color[0] += (specular[0] + diffuse[0]);
-            color[1] += (specular[1] + diffuse[1]);
-            color[2] += (specular[2] + diffuse[2]);
+            color[0] += fang * (specular[0] + diffuse[0]);
+            color[1] += fang * (specular[1] + diffuse[1]);
+            color[2] += fang * (specular[2] + diffuse[2]);
             //color[0] += diffuse[0];
             //color[1] += diffuse[1];
             //color[2] += diffuse[2];
@@ -281,6 +299,9 @@ void raycast_scene(image *img, double cam_width, double cam_height, object *obje
 
             // set ambient color
             if (best_t > 0 && best_t != INFINITY && best_o != -1) {// there was an intersection
+                if (i == 700 && j == 30) {
+                    printf("this is it\n");
+                }
                 shade(&ray, best_o, best_t, color);
                 shade_pixel(color, i, j, img);
                 //shade_pixel(objects[best_o].sphere.diff_color, i, j, img);
