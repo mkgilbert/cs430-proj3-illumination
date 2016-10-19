@@ -89,7 +89,6 @@ double calculate_angular_att(Light *light, double direction_to_object[3]) {
     }
     double theta_rad = light->theta_deg * (M_PI / 180);
     double cos_theta = cos(theta_rad);
-    //double cos_theta = cos(M_PI / 2.0);
     double vo_dot_vl = v3_dot(light->direction, direction_to_object);
     if (vo_dot_vl < cos_theta)
         return 0.0;
