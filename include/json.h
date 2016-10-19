@@ -15,6 +15,8 @@
 #define SPHERE 2
 #define PLANE 3
 #define LIGHT 4
+#define SPOTLIGHT 5
+#define POINTLIGHT 6
 
 // structs to store different types of objects
 typedef struct camera_t {
@@ -37,6 +39,7 @@ typedef struct plane_t {
 } Plane;
 
 typedef struct light_t {
+    int type;
     double *color;
     double *position;
     double *direction;

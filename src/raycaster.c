@@ -156,9 +156,24 @@ void get_dist_and_idx_closest_obj(Ray *ray, int self_index, double max_distance,
 
 double calculate_angular_att(Light *light, double direction_to_object[3]) {
     //TODO: check if light is not a spotlight. if not, return 1.0
+    if (light->type != SPOTLIGHT)
+        return 1.0;
     double v0_dot_vl = v3_dot(light->direction, direction_to_object);
     double fang = pow(v0_dot_vl, light->ang_att0);
     return fang;
+}
+
+double calculate_radial_att(Light *light, double distance_to_light) {
+    if (light->rad_att0 == 0 && light->rad_att1 == 0 && light->rad_att2 == 0) {
+        fprintf(stdout, "WARNING: calculate_radial_att: Found all 0s for attenuation. Assuming default values of radial attenuation\n");
+        light->rad_att2 = 1.0;
+    }
+    // if d_l == infinity, return 1
+    if (distance_to_light > 99999999999999) return 1.0;
+
+    double dl_sqr = sqr(distance_to_light);
+    double denom = light->rad_att2 * dl_sqr + light->rad_att1 * distance_to_light + light->ang_att0;
+    return 1.0 / denom;
 }
 
 /**
@@ -233,20 +248,22 @@ void shade(Ray *ray, int obj_index, double t, double color[3]) {
             v3_zero(diffuse);
             v3_zero(specular);
             calculate_diffuse(normal, L, lights[i].color, obj_diff_color, diffuse);
-            calculate_specular(4, L, R, normal, V, obj_spec_color, lights[i].color, specular);
+            calculate_specular(1, L, R, normal, V, obj_spec_color, lights[i].color, specular);
 
             // calculate the angular and radial attenuation
             double fang;
+            double frad;
             // get the vector from the object to the light
             double obj_to_light_dir[3];
             v3_copy(ray_new.direction, obj_to_light_dir);
             v3_scale(obj_to_light_dir, -1, obj_to_light_dir);
 
             fang = calculate_angular_att(&lights[i], obj_to_light_dir);
+            frad = calculate_radial_att(&lights[i], distance_to_light);
             // TODO: calculate frad(), fang(), and specular
-            color[0] += fang * (specular[0] + diffuse[0]);
-            color[1] += fang * (specular[1] + diffuse[1]);
-            color[2] += fang * (specular[2] + diffuse[2]);
+            color[0] += frad * fang * (specular[0] + diffuse[0]);
+            color[1] += frad * fang * (specular[1] + diffuse[1]);
+            color[2] += frad * fang * (specular[2] + diffuse[2]);
             //color[0] += diffuse[0];
             //color[1] += diffuse[1];
             //color[2] += diffuse[2];
@@ -299,9 +316,6 @@ void raycast_scene(image *img, double cam_width, double cam_height, object *obje
 
             // set ambient color
             if (best_t > 0 && best_t != INFINITY && best_o != -1) {// there was an intersection
-                if (i == 700 && j == 30) {
-                    printf("this is it\n");
-                }
                 shade(&ray, best_o, best_t, color);
                 shade_pixel(color, i, j, img);
                 //shade_pixel(objects[best_o].sphere.diff_color, i, j, img);
