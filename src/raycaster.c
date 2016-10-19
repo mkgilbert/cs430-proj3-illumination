@@ -13,7 +13,7 @@
 #include <string.h>
 #include <math.h>
 
-#define NS 20   // constant for illumination
+#define SHININESS 20   // constant for shininess
 
 /* overall background color for the image */
 V3 background_color = {0, 0, 0};
@@ -182,7 +182,6 @@ void shade(Ray *ray, int obj_index, double t, double color[3]) {
     };
 
     for (int i=0; i<nlights; i++) {
-
         // find new ray direction
         v3_sub(lights[i].position, ray_new.origin, ray_new.direction);
         double distance_to_light = v3_len(ray_new.direction);
@@ -217,7 +216,6 @@ void shade(Ray *ray, int obj_index, double t, double color[3]) {
                 fprintf(stderr, "Error: shade: Trying to shade unsupported type of object\n");
                 exit(1);
             }
-            // added this ***
             normalize(normal);
             // find light, reflection and camera vectors
             double L[3];
@@ -232,7 +230,7 @@ void shade(Ray *ray, int obj_index, double t, double color[3]) {
             v3_zero(diffuse);
             v3_zero(specular);
             calculate_diffuse(normal, L, lights[i].color, obj_diff_color, diffuse);
-            calculate_specular(NS, L, R, normal, V, obj_spec_color, lights[i].color, specular);
+            calculate_specular(SHININESS, L, R, normal, V, obj_spec_color, lights[i].color, specular);
 
             // calculate the angular and radial attenuation
             double fang;
