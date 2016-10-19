@@ -436,11 +436,43 @@ void read_json(FILE *json) {
                 exit(1);
             }
         }
-        if (obj_type == LIGHT)
+        // TODO: check for the spotlight / color values for each object to make sure they are present
+        if (obj_type == LIGHT) {
+            if (lights[light_counter].type == SPOTLIGHT) {
+                if (lights[light_counter].direction == NULL) {
+                    fprintf(stderr, "Error: parse_json: 'spotlight' light type must have a direction: %d\n", line);
+                    exit(1);
+                }
+                if (lights[light_counter].theta_deg == 0.0) {
+                    fprintf(stderr, "Error: parse_json: 'spotlight' light type must have a theta value: %d\n", line);
+                    exit(1);
+                }
+            }
             light_counter++;
-        else
+        }
+        else {
+            if (obj_type == SPHERE || obj_type == PLANE) {
+                if (objects[obj_counter].sphere.spec_color == NULL) {
+                    fprintf(stderr, "Error: parse_json: object must have a specular color: %d\n", line);
+                    exit(1);
+                }
+                if (objects[obj_counter].sphere.diff_color == NULL) {
+                    fprintf(stderr, "Error: parse_json: object must have a diffuse color: %d\n", line);
+                    exit(1);
+                }
+            }
+            if (obj_type == CAMERA) {
+                if (objects[obj_counter].camera.width == 0) {
+                    fprintf(stderr, "Error: parse_json: camera must have a width: %d\n", line);
+                    exit(1);
+                }
+                if (objects[obj_counter].camera.height == 0) {
+                    fprintf(stderr, "Error: parse_json: camera must have a height: %d\n", line);
+                    exit(1);
+                }
+            }
             obj_counter++;
-
+        }
         if (not_done)
             c = next_c(json);
     }
