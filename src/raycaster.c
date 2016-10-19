@@ -13,6 +13,8 @@
 #include <string.h>
 #include <math.h>
 
+#define NS 20   // constant for illumination
+
 /* overall background color for the image */
 V3 background_color = {0, 0, 0};
 
@@ -40,7 +42,7 @@ int get_camera(object *objects) {
  * @param col - which column the pixel is on
  * @param img - image struct that allows for indexing the appropriate spot
  */
-void shade_pixel(double *color, int row, int col, image *img) {
+void set_pixel_color(double *color, int row, int col, image *img) {
     // fill in pixel color values
     // the color vals are stored as values between 0 and 1, so we need to adjust
     img->pixmap[row * img->width + col].r = (unsigned char)(MAX_COLOR_VAL * clamp(color[0]));
@@ -154,30 +156,8 @@ void get_dist_and_idx_closest_obj(Ray *ray, int self_index, double max_distance,
     (*ret_best_t) = best_t;
 }
 
-double calculate_angular_att(Light *light, double direction_to_object[3]) {
-    //TODO: check if light is not a spotlight. if not, return 1.0
-    if (light->type != SPOTLIGHT)
-        return 1.0;
-    double v0_dot_vl = v3_dot(light->direction, direction_to_object);
-    double fang = pow(v0_dot_vl, light->ang_att0);
-    return fang;
-}
-
-double calculate_radial_att(Light *light, double distance_to_light) {
-    if (light->rad_att0 == 0 && light->rad_att1 == 0 && light->rad_att2 == 0) {
-        fprintf(stdout, "WARNING: calculate_radial_att: Found all 0s for attenuation. Assuming default values of radial attenuation\n");
-        light->rad_att2 = 1.0;
-    }
-    // if d_l == infinity, return 1
-    if (distance_to_light > 99999999999999) return 1.0;
-
-    double dl_sqr = sqr(distance_to_light);
-    double denom = light->rad_att2 * dl_sqr + light->rad_att1 * distance_to_light + light->ang_att0;
-    return 1.0 / denom;
-}
 
 /**
- *
  * @param ray - original ray -- starting point for testing shade
  * @param obj_index  - index of the current object we are running shade on
  * @param t - distance to the object
@@ -248,7 +228,7 @@ void shade(Ray *ray, int obj_index, double t, double color[3]) {
             v3_zero(diffuse);
             v3_zero(specular);
             calculate_diffuse(normal, L, lights[i].color, obj_diff_color, diffuse);
-            calculate_specular(1, L, R, normal, V, obj_spec_color, lights[i].color, specular);
+            calculate_specular(NS, L, R, normal, V, obj_spec_color, lights[i].color, specular);
 
             // calculate the angular and radial attenuation
             double fang;
@@ -317,13 +297,11 @@ void raycast_scene(image *img, double cam_width, double cam_height, object *obje
             // set ambient color
             if (best_t > 0 && best_t != INFINITY && best_o != -1) {// there was an intersection
                 shade(&ray, best_o, best_t, color);
-                shade_pixel(color, i, j, img);
-                //shade_pixel(objects[best_o].sphere.diff_color, i, j, img);
+                set_pixel_color(color, i, j, img);
             }
             else {
-                shade_pixel(background_color, i, j, img);
+                set_pixel_color(background_color, i, j, img);
             }
         }
-        //printf("\n");
     }
 }

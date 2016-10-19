@@ -43,6 +43,7 @@ typedef struct light_t {
     double *color;
     double *position;
     double *direction;
+    double theta_deg;
     double rad_att0;
     double rad_att1;
     double rad_att2;

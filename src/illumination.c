@@ -4,6 +4,7 @@
 #include <math.h>
 #include "../include/illumination.h"
 #include "../include/vector_math.h"
+#include "../include/json.h"
 
 /**
  * Clamps colors -- makes sure they are within a certain range. We don't want values outside of 0-1
@@ -52,4 +53,33 @@ void calculate_specular(double ns, double *L, double *R, double *N, double *V, d
     else {
         v3_zero(out_color);
     }
+}
+
+double calculate_angular_att(Light *light, double direction_to_object[3]) {
+    if (light->type != SPOTLIGHT)
+        return 1.0;
+    if (light->direction == NULL) {
+        fprintf(stderr, "Error: calculate_angular_att: Can't have spotlight with no direction\n");
+        exit(1);
+    }
+    double theta_rad = light->theta_deg * (M_PI / 180);
+    double cos_theta = cos(theta_rad);
+    //double cos_theta = cos(M_PI / 2.0);
+    double vo_dot_vl = v3_dot(light->direction, direction_to_object);
+    if (vo_dot_vl < cos_theta)
+        return 0.0;
+    return pow(vo_dot_vl, light->ang_att0);
+}
+
+double calculate_radial_att(Light *light, double distance_to_light) {
+    if (light->rad_att0 == 0 && light->rad_att1 == 0 && light->rad_att2 == 0) {
+        fprintf(stdout, "WARNING: calculate_radial_att: Found all 0s for attenuation. Assuming default values of radial attenuation\n");
+        light->rad_att2 = 1.0;
+    }
+    // if d_l == infinity, return 1
+    if (distance_to_light > 99999999999999) return 1.0;
+
+    double dl_sqr = sqr(distance_to_light);
+    double denom = light->rad_att2 * dl_sqr + light->rad_att1 * distance_to_light + light->ang_att0;
+    return 1.0 / denom;
 }

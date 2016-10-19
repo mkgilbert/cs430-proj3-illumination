@@ -290,6 +290,21 @@ void read_json(FILE *json) {
                         }
                         objects[obj_counter].sphere.radius = temp;
                     }
+                    else if (strcmp(key, "theta") == 0) {
+                        if (obj_type != LIGHT) {
+                            fprintf(stderr, "Error: read_json: Theta cannot be set on this type: %d\n", line);
+                            exit(1);
+                        }
+                        double theta = next_number(json);
+                        if (theta > 0.0) {
+                            lights[light_counter].type = SPOTLIGHT;
+                        }
+                        else if (theta < 0.0) { // TODO: find out if this should be <=
+                            fprintf(stderr, "Error: read_json: theta must be >= 0: %d\n", line);
+                            exit(1);
+                        }
+                        lights[light_counter].theta_deg = theta;
+                    }
                     else if (strcmp(key, "radial-a0") == 0) {
                         if (obj_type != LIGHT) {
                             fprintf(stderr, "Error: read_json: Radial-a0 cannot be set on this type: %d\n", line);
