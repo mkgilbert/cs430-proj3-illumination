@@ -20,6 +20,14 @@ double clamp(double color_val){
         return color_val;
 }
 
+/**
+ * Calculates the diffuse reflection of an object and puts it into an RGB color
+ * @param N - normal vector of the object (should be pre-normalized)
+ * @param L - Vector from intersection point on object to the light (should be pre-normalized)
+ * @param IL - Illumination level of the light. In essence the "color" of the light
+ * @param KD - The diffuse color of the object
+ * @param out_color - the resulting RGB color when we're done
+ */
 void calculate_diffuse(double *N, double *L, double *IL, double *KD, double *out_color) {
     // K_a*I_a should be added to the beginning of this whole thing, which is a constant and ambient light
     double n_dot_l = v3_dot(N, L);
@@ -39,6 +47,17 @@ void calculate_diffuse(double *N, double *L, double *IL, double *KD, double *out
     }
 }
 
+/**
+ * Calculates the specular reflection of an object and puts in into an RGB color
+ * @param ns - shininess constant
+ * @param L - Vector from intersection of object to the light
+ * @param R - Reflection vector of the L vector
+ * @param N - Normal vector of the object (should be pre-normalized)
+ * @param V - Vector from the intersection point on the object to the camera or previous object
+ * @param KS - Object's specular color
+ * @param IL - Illumination level of the light. In essence the "color" of the light
+ * @param out_color - where we store the resulting RGB color value
+ */
 void calculate_specular(double ns, double *L, double *R, double *N, double *V, double *KS, double *IL, double *out_color) {
     double v_dot_r = v3_dot(V, R);
     double n_dot_l = v3_dot(N, L);
@@ -55,6 +74,12 @@ void calculate_specular(double ns, double *L, double *R, double *N, double *V, d
     }
 }
 
+/**
+ * Calculates the angular attenuation of light based on predefined theta value and direction
+ * @param light - light struct that we care about
+ * @param direction_to_object - direction vector from the light to the object
+ * @return - returns the attenuation value
+ */
 double calculate_angular_att(Light *light, double direction_to_object[3]) {
     if (light->type != SPOTLIGHT)
         return 1.0;
@@ -71,6 +96,12 @@ double calculate_angular_att(Light *light, double direction_to_object[3]) {
     return pow(vo_dot_vl, light->ang_att0);
 }
 
+/**
+ * Calculates the radial attenuation of a light source
+ * @param light - light struct that we care about
+ * @param distance_to_light - distance from the object we're calculating this on to the light
+ * @return - returns the attenuation value
+ */
 double calculate_radial_att(Light *light, double distance_to_light) {
     if (light->rad_att0 == 0 && light->rad_att1 == 0 && light->rad_att2 == 0) {
         fprintf(stdout, "WARNING: calculate_radial_att: Found all 0s for attenuation. Assuming default values of radial attenuation\n");
