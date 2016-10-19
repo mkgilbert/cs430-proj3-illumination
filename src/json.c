@@ -299,7 +299,7 @@ void read_json(FILE *json) {
                         if (theta > 0.0) {
                             lights[light_counter].type = SPOTLIGHT;
                         }
-                        else if (theta < 0.0) { // TODO: find out if this should be <=
+                        else if (theta < 0.0) {
                             fprintf(stderr, "Error: read_json: theta must be >= 0: %d\n", line);
                             exit(1);
                         }
@@ -311,7 +311,7 @@ void read_json(FILE *json) {
                             exit(1);
                         }
                         double rad_a = next_number(json);
-                        if (rad_a < 0) { // TODO: find out if this should be <=
+                        if (rad_a < 0) {
                             fprintf(stderr, "Error: read_json: radial-a0 must be positive: %d\n", line);
                             exit(1);
                         }
@@ -323,7 +323,7 @@ void read_json(FILE *json) {
                             exit(1);
                         }
                         double rad_a = next_number(json);
-                        if (rad_a < 0) { // TODO: find out if this should be <=
+                        if (rad_a < 0) {
                             fprintf(stderr, "Error: read_json: radial-a1 must be positive: %d\n", line);
                             exit(1);
                         }
@@ -335,7 +335,7 @@ void read_json(FILE *json) {
                             exit(1);
                         }
                         double rad_a = next_number(json);
-                        if (rad_a < 0) { // TODO: find out if this should be <=
+                        if (rad_a < 0) {
                             fprintf(stderr, "Error: read_json: radial-a2 must be positive: %d\n", line);
                             exit(1);
                         }
@@ -347,7 +347,7 @@ void read_json(FILE *json) {
                             exit(1);
                         }
                         double ang_a = next_number(json);
-                        if (ang_a < 0) { // TODO: find out if this should be <=
+                        if (ang_a < 0) {
                             fprintf(stderr, "Error: read_json: angular-a0 must be positive: %d\n", line);
                             exit(1);
                         }
@@ -436,7 +436,6 @@ void read_json(FILE *json) {
                 exit(1);
             }
         }
-        // TODO: check for the spotlight / color values for each object to make sure they are present
         if (obj_type == LIGHT) {
             if (lights[light_counter].type == SPOTLIGHT) {
                 if (lights[light_counter].direction == NULL) {

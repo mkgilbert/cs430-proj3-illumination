@@ -244,16 +244,9 @@ void shade(Ray *ray, int obj_index, double t, double color[3]) {
 
             fang = calculate_angular_att(&lights[i], obj_to_light_dir);
             frad = calculate_radial_att(&lights[i], distance_to_light);
-            // TODO: calculate frad(), fang(), and specular
             color[0] += frad * fang * (specular[0] + diffuse[0]);
             color[1] += frad * fang * (specular[1] + diffuse[1]);
             color[2] += frad * fang * (specular[2] + diffuse[2]);
-            //color[0] += diffuse[0];
-            //color[1] += diffuse[1];
-            //color[2] += diffuse[2];
-            //color[0] += specular[0];
-            //color[1] += specular[1];
-            //color[2] += specular[2];
         }
         // there was an object in the way, so we don't do anything. It's shadow
     }
