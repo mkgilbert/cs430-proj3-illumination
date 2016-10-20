@@ -33,7 +33,12 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    read_json(json); // this sends info to a global array of objects
+    /* initialize object and light arrays to have all null values */
+    init_lights();
+    init_objects();
+
+    /* fill object and light arrays with scene info */
+    read_json(json);
 
     /* create image */
     image img;

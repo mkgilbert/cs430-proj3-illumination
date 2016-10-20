@@ -478,6 +478,14 @@ void read_json(FILE *json) {
     nobjects = obj_counter;
 }
 
+void init_objects() {
+    memset(objects, '\0', sizeof(objects));
+}
+
+void init_lights() {
+    memset(lights, '\0', sizeof(lights));
+}
+
 /* testing/debug functions */
 void print_objects(object *obj) {
     int i = 0;

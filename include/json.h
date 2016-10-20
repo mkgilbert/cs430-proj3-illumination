@@ -68,6 +68,8 @@ extern int nobjects;
 
 /* function definitions */
 void read_json(FILE *json);
+void init_objects();
+void init_lights();
 void print_objects(object *obj);
 
 #endif //CS430_PROJ3_ILLUMINATION_JSON_H
