@@ -478,10 +478,16 @@ void read_json(FILE *json) {
     nobjects = obj_counter;
 }
 
+/**
+ * initializes list of objects to be empty for each element
+ */
 void init_objects() {
     memset(objects, '\0', sizeof(objects));
 }
 
+/**
+ * initializes list of lights to be empty for each element
+ */
 void init_lights() {
     memset(lights, '\0', sizeof(lights));
 }
