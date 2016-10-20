@@ -283,7 +283,7 @@ void raycast_scene(image *img, double cam_width, double cam_height, object *obje
             normalize(point);   // normalize the point
             // store normalized point as our ray direction
             v3_copy(point, ray.direction);
-            double color[3] = {0.0, 0.0, 0.0};
+            double color[3] = {0, 0, 0};
 
             int best_o;     // index of 'best' or closest object
             double best_t;  // closest distance
