@@ -169,7 +169,7 @@ void shade(Ray *ray, int obj_index, double t, double color[3]) {
     double new_dir[3];
 
     // find new ray origin
-    if (ray->direction == NULL || ray->origin == NULL) {
+    if (ray == NULL) {
         fprintf(stderr, "Error: shade: Ray had no data\n");
         exit(1);
     }
