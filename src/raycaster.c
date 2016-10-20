@@ -236,11 +236,11 @@ void shade(Ray *ray, int obj_index, double t, double color[3]) {
             double fang;
             double frad;
             // get the vector from the object to the light
-            double obj_to_light_dir[3];
-            v3_copy(ray_new.direction, obj_to_light_dir);
-            v3_scale(obj_to_light_dir, -1, obj_to_light_dir);
+            double light_to_obj_dir[3];
+            v3_copy(L, light_to_obj_dir);
+            v3_scale(light_to_obj_dir, -1, light_to_obj_dir);
 
-            fang = calculate_angular_att(&lights[i], obj_to_light_dir);
+            fang = calculate_angular_att(&lights[i], light_to_obj_dir);
             frad = calculate_radial_att(&lights[i], distance_to_light);
             color[0] += frad * fang * (specular[0] + diffuse[0]);
             color[1] += frad * fang * (specular[1] + diffuse[1]);

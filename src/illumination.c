@@ -87,7 +87,8 @@ double calculate_angular_att(Light *light, double direction_to_object[3]) {
         fprintf(stderr, "Error: calculate_angular_att: Can't have spotlight with no direction\n");
         exit(1);
     }
-    double theta_rad = light->theta_deg * (M_PI / 180);
+    normalize(light->direction);
+    double theta_rad = light->theta_deg * (M_PI / 180.0);
     double cos_theta = cos(theta_rad);
     double vo_dot_vl = v3_dot(light->direction, direction_to_object);
     if (vo_dot_vl < cos_theta)
